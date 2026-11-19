@@ -1,0 +1,26 @@
+name: Deploy site from zip
+on:
+  push:
+    paths:
+      - 'site.zip'
+      - '.github/workflows/deploy.yml'
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unzip site
+        run: |
+          rm -rf assets cesium events icons models
+          rm -f index.html location.svg logo.svg manifest.webmanifest mic.svg pin.svg quebec-cameras.json visual-presets.svg
+          unzip -o site.zip
+          rm -f site.zip
+      - name: Commit extracted files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "Deploy site from zip [skip ci]"
+          git push
